@@ -1,8 +1,8 @@
 resource "aws_rds_cluster" "this" {
   cluster_identifier              = var.namespace
   engine                          = "aurora-postgresql"
-  engine_version                  = "13.4"
-  database_name                   = "gatehawk"
+  engine_version                  = "14.6"
+  database_name                   = var.database_name
   skip_final_snapshot             = false
   final_snapshot_identifier       = "${var.namespace}-final"
   master_username                 = "root"
@@ -60,7 +60,7 @@ locals {
 resource "aws_rds_cluster_instance" "this" {
   count                = var.instance_count
   engine               = "aurora-postgresql"
-  engine_version       = "13.4"
+  engine_version       = "14.6"
   identifier           = "${var.namespace}-${count.index + 1}"
   cluster_identifier   = aws_rds_cluster.this.id
   instance_class       = var.instance_class
@@ -73,24 +73,6 @@ resource "aws_db_subnet_group" "this" {
   description = "RDS - ${var.namespace} Subnet Group"
   subnet_ids  = var.database_subnets
   tags        = var.tags
-}
-#This is to enable Database Migration service.
-resource "aws_rds_cluster_parameter_group" "default" {
-  name        = "gatehawk-paramter-group"
-  family      = "aurora-postgresql13"
-  description = "gatehawk parameter group"
-  count       = 0
-
-  parameter {
-    name         = "rds.logical_replication"
-    value        = "1"
-    apply_method = "pending-reboot"
-  }
-  parameter {
-    name         = "wal_sender_timeout"
-    value        = "0"
-    apply_method = "pending-reboot"
-  }
 }
 
 ####################################
