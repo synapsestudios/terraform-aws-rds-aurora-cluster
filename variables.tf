@@ -3,6 +3,11 @@ variable "namespace" {
   description = "Determines naming convention of assets. Generally follows DNS naming convention."
 }
 
+variable "database_name" {
+  type        = string
+  description = "Name of the default database to create"
+}
+
 variable "vpc_id" {
   type        = string
   description = "The ID of the vpc the database belongs to"
