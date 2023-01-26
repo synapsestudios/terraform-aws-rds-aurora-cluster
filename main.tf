@@ -95,10 +95,7 @@ output "db_cluster_id" {
 }
 
 output "security_group_id" {
-  value = aws_security_group.
-    
-  
-  base.id
+  value = aws_security_group.this.id
 }
 output "root_password_secret_id" {
   value = aws_secretsmanager_secret.root_password.id
