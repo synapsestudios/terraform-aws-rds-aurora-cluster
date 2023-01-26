@@ -25,7 +25,7 @@ resource "aws_secretsmanager_secret" "root_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "root_password" {
-  secret_id     = aws_secretsmanager_secret.this.id
+  secret_id     = aws_secretsmanager_secret.root_password.id
   secret_string = random_password.password.result
 }
 
@@ -101,7 +101,7 @@ output "security_group_id" {
   base.id
 }
 output "root_password_secret_id" {
-  value = aws_secretsmanager_secret.this.id
+  value = aws_secretsmanager_secret.root_password.id
 }
 output "connection_string_arn" {
   value = aws_secretsmanager_secret.connection_string.arn
