@@ -16,7 +16,6 @@ resource "aws_rds_cluster" "this" {
   tags                            = var.tags
   db_cluster_parameter_group_name = var.db_cluster_parameter_group_name
   deletion_protection             = true
-  depends_on                      = [aws_rds_cluster_parameter_group.default]
 }
 
 resource "aws_secretsmanager_secret" "this" {
