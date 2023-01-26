@@ -18,19 +18,19 @@ resource "aws_rds_cluster" "this" {
   deletion_protection             = true
 }
 
-resource "aws_secretsmanager_secret" "this" {
+resource "aws_secretsmanager_secret" "root_password" {
   name        = "aurora-root-${var.namespace}"
   description = "Root password for the ${var.namespace} aurora cluster database"
   tags        = var.tags
 }
 
-resource "aws_secretsmanager_secret_version" "this" {
+resource "aws_secretsmanager_secret_version" "root_password" {
   secret_id     = aws_secretsmanager_secret.this.id
   secret_string = random_password.password.result
 }
 
 resource "random_password" "password" {
-  length           = 16
+  length           = 32
   special          = true
   override_special = "_%"
 }
@@ -43,17 +43,7 @@ resource "aws_secretsmanager_secret" "connection_string" {
 
 resource "aws_secretsmanager_secret_version" "connection_string" {
   secret_id     = aws_secretsmanager_secret.connection_string.id
-  secret_string = jsonencode(local.connection_string)
-}
-
-locals {
-  connection_string = {
-    POSTGRES_HOST     = aws_rds_cluster.this.endpoint
-    POSTGRES_DATABASE = aws_rds_cluster.this.database_name
-    POSTGRES_USER     = aws_rds_cluster.this.master_username
-    POSTGRES_PASSWORD = aws_secretsmanager_secret_version.this.secret_string
-    POSTGRES_PORT     = aws_rds_cluster.this.port
-  }
+  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${aws_secretsmanager_secret_version.root_password.secret_string}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
 }
 
 resource "aws_rds_cluster_instance" "this" {
@@ -77,7 +67,7 @@ resource "aws_db_subnet_group" "this" {
 ####################################
 # Security Groups - Database Traffic
 ####################################
-resource "aws_security_group" "database" {
+resource "aws_security_group" "this" {
   name        = "${var.namespace}-database-access"
   description = "Database traffic rules"
   vpc_id      = var.vpc_id
@@ -105,9 +95,12 @@ output "db_cluster_id" {
 }
 
 output "security_group_id" {
-  value = aws_security_group.database.id
+  value = aws_security_group.
+    
+  
+  base.id
 }
-output "db_password_secret_id" {
+output "root_password_secret_id" {
   value = aws_secretsmanager_secret.this.id
 }
 output "connection_string_arn" {
