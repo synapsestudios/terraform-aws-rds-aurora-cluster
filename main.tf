@@ -12,7 +12,7 @@ resource "aws_rds_cluster" "this" {
   availability_zones              = var.availability_zones
   preferred_backup_window         = "07:00-09:00"
   backup_retention_period         = 5
-  vpc_security_group_ids          = concat([aws_security_group.database.id], var.additional_security_groups)
+  vpc_security_group_ids          = concat([aws_security_group.this.id], var.additional_security_groups)
   tags                            = var.tags
   db_cluster_parameter_group_name = var.db_cluster_parameter_group_name
   deletion_protection             = true
