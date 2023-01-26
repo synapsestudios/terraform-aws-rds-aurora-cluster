@@ -6,7 +6,7 @@ resource "aws_rds_cluster" "this" {
   skip_final_snapshot             = false
   final_snapshot_identifier       = "${var.namespace}-final"
   master_username                 = "root"
-  master_password                 = aws_secretsmanager_secret_version.this.secret_string
+  master_password                 = aws_secretsmanager_secret_version.root_password.secret_string
   db_subnet_group_name            = aws_db_subnet_group.this.name
   storage_encrypted               = true
   availability_zones              = var.availability_zones
