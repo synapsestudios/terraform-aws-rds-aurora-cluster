@@ -1,10 +1,10 @@
 resource "aws_rds_cluster" "this" {
-  cluster_identifier_prefix       = var.namespace
+  cluster_identifier_prefix       = var.name
   engine                          = "aurora-postgresql"
   engine_version                  = "14.6"
   database_name                   = var.database_name
   skip_final_snapshot             = false
-  final_snapshot_identifier       = "${var.namespace}-final"
+  final_snapshot_identifier       = "${var.name}-final"
   master_username                 = "root"
   master_password                 = aws_secretsmanager_secret_version.root_password.secret_string
   db_subnet_group_name            = aws_db_subnet_group.this.name
@@ -19,8 +19,8 @@ resource "aws_rds_cluster" "this" {
 }
 
 resource "aws_secretsmanager_secret" "root_password" {
-  name_prefix = "aurora-root-${var.namespace}"
-  description = "Root password for the ${var.namespace} aurora cluster database"
+  name_prefix = "aurora-root-${var.name}"
+  description = "Root password for the ${var.name} aurora cluster database"
   tags        = var.tags
 }
 
@@ -36,8 +36,8 @@ resource "random_password" "password" {
 }
 
 resource "aws_secretsmanager_secret" "connection_string" {
-  name_prefix = "aurora-connectionstring-${var.namespace}"
-  description = "Connection String for the ${var.namespace} aurora cluster database"
+  name_prefix = "aurora-connectionstring-${var.name}"
+  description = "Connection String for the ${var.name} aurora cluster database"
   tags        = var.tags
 }
 
@@ -50,7 +50,7 @@ resource "aws_rds_cluster_instance" "this" {
   count                = var.instance_count
   engine               = "aurora-postgresql"
   engine_version       = "14.6"
-  identifier           = "${var.namespace}-${count.index + 1}"
+  identifier           = "${var.name}-${count.index + 1}"
   cluster_identifier   = aws_rds_cluster.this.id
   instance_class       = var.instance_class
   db_subnet_group_name = aws_db_subnet_group.this.name
@@ -58,8 +58,8 @@ resource "aws_rds_cluster_instance" "this" {
 }
 
 resource "aws_db_subnet_group" "this" {
-  name_prefix = var.namespace
-  description = "RDS - ${var.namespace} Subnet Group"
+  name_prefix = var.name
+  description = "RDS - ${var.name} Subnet Group"
   subnet_ids  = var.database_subnets
   tags        = var.tags
 }
@@ -68,7 +68,7 @@ resource "aws_db_subnet_group" "this" {
 # Security Groups - Database Traffic
 ####################################
 resource "aws_security_group" "this" {
-  name_prefix = "${var.namespace}-database-access"
+  name_prefix = "${var.name}-database-access"
   description = "Database traffic rules"
   vpc_id      = var.vpc_id
   tags        = merge(var.tags, { name = "database" })
