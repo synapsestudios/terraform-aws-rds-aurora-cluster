@@ -1,4 +1,4 @@
-variable "namespace" {
+variable "name" {
   type        = string
   description = "Determines naming convention of assets. Generally follows DNS naming convention."
 }
