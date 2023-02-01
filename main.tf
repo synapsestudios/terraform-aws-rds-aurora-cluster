@@ -1,5 +1,5 @@
 resource "aws_rds_cluster" "this" {
-  cluster_identifier              = var.namespace
+  cluster_identifier_prefix       = var.namespace
   engine                          = "aurora-postgresql"
   engine_version                  = "14.6"
   database_name                   = var.database_name
@@ -19,7 +19,7 @@ resource "aws_rds_cluster" "this" {
 }
 
 resource "aws_secretsmanager_secret" "root_password" {
-  name        = "aurora-root-${var.namespace}"
+  name_prefix = "aurora-root-${var.namespace}"
   description = "Root password for the ${var.namespace} aurora cluster database"
   tags        = var.tags
 }
@@ -36,7 +36,7 @@ resource "random_password" "password" {
 }
 
 resource "aws_secretsmanager_secret" "connection_string" {
-  name        = "aurora-connectionstring-${var.namespace}"
+  name_prefix = "aurora-connectionstring-${var.namespace}"
   description = "Connection String for the ${var.namespace} aurora cluster database"
   tags        = var.tags
 }
@@ -58,7 +58,7 @@ resource "aws_rds_cluster_instance" "this" {
 }
 
 resource "aws_db_subnet_group" "this" {
-  name        = var.namespace
+  name_prefix = var.namespace
   description = "RDS - ${var.namespace} Subnet Group"
   subnet_ids  = var.database_subnets
   tags        = var.tags
@@ -68,7 +68,7 @@ resource "aws_db_subnet_group" "this" {
 # Security Groups - Database Traffic
 ####################################
 resource "aws_security_group" "this" {
-  name        = "${var.namespace}-database-access"
+  name_prefix = "${var.namespace}-database-access"
   description = "Database traffic rules"
   vpc_id      = var.vpc_id
   tags        = merge(var.tags, { name = "database" })
