@@ -32,7 +32,8 @@ resource "aws_secretsmanager_secret_version" "root_password" {
 resource "random_password" "password" {
   length           = 32
   special          = true
-  override_special = "_%"
+  min_special      = 1
+  override_special = "-._~" # URL-safe characters prevent parsing errors when using this password in a connection string
 }
 
 resource "aws_secretsmanager_secret" "connection_string" {
