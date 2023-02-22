@@ -51,7 +51,7 @@ resource "aws_rds_cluster_instance" "this" {
   count                = var.instance_count
   engine               = "aurora-postgresql"
   engine_version       = "14.6"
-  identifier           = "${var.name}-${count.index + 1}"
+  identifier_prefix    = "${var.name}-${count.index + 1}"
   cluster_identifier   = aws_rds_cluster.this.id
   instance_class       = var.instance_class
   db_subnet_group_name = aws_db_subnet_group.this.name
