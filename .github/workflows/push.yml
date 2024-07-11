@@ -1,0 +1,11 @@
+name: Push Jobs
+on:
+  push:
+    branches: [main]
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+jobs:
+  tfscan:
+    uses: synapsestudios/.github/.github/workflows/tf-scan.yml@master
