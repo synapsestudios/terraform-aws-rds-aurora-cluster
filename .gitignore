@@ -37,4 +37,4 @@ terraform.rc
 .vscode/*
 
 # Ignore test files
-test/**/*.lock.hcl
+**/.terraform.lock.hcl
