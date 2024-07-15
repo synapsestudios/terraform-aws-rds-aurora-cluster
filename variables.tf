@@ -6,6 +6,7 @@ variable "name" {
 variable "database_name" {
   type        = string
   description = "Name of the default database to create"
+  default = "main"
 }
 
 variable "vpc_id" {
