@@ -49,4 +49,5 @@ variable "db_cluster_parameter_group_name" {
 variable "instance_class" {
   type        = string
   description = "Instance class"
+  default = "db.t4g.medium"
 }
