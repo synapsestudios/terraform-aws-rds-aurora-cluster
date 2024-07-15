@@ -1,6 +1,6 @@
 variable "name" {
   type        = string
-  description = "Determines naming convention of assets. Generally follows DNS naming convention."
+  description = "Determines naming convention of assets. Generally follows DNS naming convention. Service name or abbreviation."
 }
 
 variable "database_name" {
