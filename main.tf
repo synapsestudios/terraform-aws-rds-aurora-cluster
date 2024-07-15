@@ -78,12 +78,14 @@ resource "aws_security_group" "this" {
     to_port     = 5432
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.database_vpc.cidr_block]
+    description = "PostgreSQL traffic in"
   }
   egress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.database_vpc.cidr_block]
+    description = "PostgreSQL traffic out"
   }
 }
 
