@@ -58,8 +58,8 @@ data "aws_iam_policy_document" "rds_monitoring" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.name}-rds-monitoring-role"
-  assume_role_policy = data.aws_iam_policy_document.rds_monitoring.json
+  name                = "${var.name}-rds-monitoring-role"
+  assume_role_policy  = data.aws_iam_policy_document.rds_monitoring.json
   managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
 }
 

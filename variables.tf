@@ -6,7 +6,7 @@ variable "name" {
 variable "database_name" {
   type        = string
   description = "Name of the default database to create"
-  default = "main"
+  default     = "main"
 }
 
 variable "vpc_id" {
@@ -50,7 +50,7 @@ variable "db_cluster_parameter_group_name" {
 variable "instance_class" {
   type        = string
   description = "Instance class"
-  default = "db.t4g.medium"
+  default     = "db.t4g.medium"
 }
 
 variable "deletion_protection" {
