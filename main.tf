@@ -1,4 +1,8 @@
 resource "aws_rds_cluster" "this" {
+  # checkov:skip=CKV2_AWS_8: Using snapshots for backups
+  # checkov:skip=CKV2_AWS_27: Parameter group is passed in as a variable
+  # checkov:skip=CKV_AWS_327: We will use AWS managed keys because CMK are expensive and not necessary for our use case
+  # checkov:skip=CKV_AWS_162: IAM Authentication does not fit into our use cases
   cluster_identifier_prefix       = var.name
   engine                          = "aurora-postgresql"
   engine_version                  = "14.6"
@@ -19,6 +23,8 @@ resource "aws_rds_cluster" "this" {
 }
 
 resource "aws_secretsmanager_secret" "connection_string" {
+  # checkov:skip=CKV2_AWS_57: RDS connection strings cannot be rotated
+  # checkov:skip=CKV_AWS_149: We will use AWS managed keys because CMK are expensive and not necessary for our use case
   name_prefix = "aurora-connectionstring-${var.name}"
   description = "Connection String for the ${var.name} aurora cluster database"
   tags        = var.tags
@@ -35,14 +41,15 @@ resource "aws_secretsmanager_secret_version" "connection_string" {
 }
 
 resource "aws_rds_cluster_instance" "this" {
-  count                = var.instance_count
-  engine               = "aurora-postgresql"
-  engine_version       = "14.6"
-  identifier_prefix    = "${var.name}-${count.index + 1}"
-  cluster_identifier   = aws_rds_cluster.this.id
-  instance_class       = var.instance_class
-  db_subnet_group_name = aws_db_subnet_group.this.name
-  tags                 = var.tags
+  # checkov:skip=CKV_AWS_354: We will use AWS managed keys because CMK are expensive and not necessary for our use case
+  count                        = var.instance_count
+  engine                       = "aurora-postgresql"
+  engine_version               = "14.6"
+  identifier_prefix            = "${var.name}-${count.index + 1}"
+  cluster_identifier           = aws_rds_cluster.this.id
+  instance_class               = var.instance_class
+  db_subnet_group_name         = aws_db_subnet_group.this.name
+  tags                         = var.tags
 }
 
 resource "aws_db_subnet_group" "this" {
