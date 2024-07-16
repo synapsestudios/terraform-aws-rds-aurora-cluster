@@ -6,7 +6,7 @@ resource "aws_rds_cluster" "this" {
   skip_final_snapshot             = false
   final_snapshot_identifier       = "${var.name}-final"
   master_username                 = "root"
-  master_password                 = aws_secretsmanager_secret_version.root_password.secret_string
+  manage_master_user_password     = true
   db_subnet_group_name            = aws_db_subnet_group.this.name
   storage_encrypted               = true
   availability_zones              = var.availability_zones
@@ -18,33 +18,20 @@ resource "aws_rds_cluster" "this" {
   deletion_protection             = true
 }
 
-resource "aws_secretsmanager_secret" "root_password" {
-  name_prefix = "aurora-root-${var.name}"
-  description = "Root password for the ${var.name} aurora cluster database"
-  tags        = var.tags
-}
-
-resource "aws_secretsmanager_secret_version" "root_password" {
-  secret_id     = aws_secretsmanager_secret.root_password.id
-  secret_string = random_password.password.result
-}
-
-resource "random_password" "password" {
-  length           = 32
-  special          = true
-  min_special      = 1
-  override_special = "-._~" # URL-safe characters prevent parsing errors when using this password in a connection string
-}
-
 resource "aws_secretsmanager_secret" "connection_string" {
   name_prefix = "aurora-connectionstring-${var.name}"
   description = "Connection String for the ${var.name} aurora cluster database"
   tags        = var.tags
 }
 
+data "aws_secretsmanager_secret_version" "root_password" {
+  secret_id = aws_rds_cluster.this.master_user_secret[0].secret_arn
+}
+
 resource "aws_secretsmanager_secret_version" "connection_string" {
   secret_id     = aws_secretsmanager_secret.connection_string.id
-  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${aws_secretsmanager_secret_version.root_password.secret_string}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
+  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${data.aws_secretsmanager_secret_version.root_password.secret_string}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
+}
 }
 
 resource "aws_rds_cluster_instance" "this" {
