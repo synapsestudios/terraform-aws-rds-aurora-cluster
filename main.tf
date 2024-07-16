@@ -43,6 +43,24 @@ resource "aws_secretsmanager_secret_version" "connection_string" {
   secret_id     = aws_secretsmanager_secret.connection_string.id
   secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${data.aws_secretsmanager_secret_version.root_password.secret_string}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
 }
+
+data "aws_iam_policy_document" "rds_monitoring" {
+  statement {
+    actions = [
+      "sts:AssumeRole",
+    ]
+
+    principals {
+      type        = "Service"
+      identifiers = ["monitoring.rds.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "this" {
+  name               = "${var.name}-rds-monitoring-role"
+  assume_role_policy = data.aws_iam_policy_document.rds_monitoring.json
+  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
 }
 
 resource "aws_rds_cluster_instance" "this" {
@@ -55,6 +73,10 @@ resource "aws_rds_cluster_instance" "this" {
   instance_class               = var.instance_class
   db_subnet_group_name         = aws_db_subnet_group.this.name
   tags                         = var.tags
+  auto_minor_version_upgrade   = true
+  monitoring_interval          = 5
+  monitoring_role_arn          = aws_iam_role.this.arn
+  performance_insights_enabled = true
 }
 
 resource "aws_db_subnet_group" "this" {
