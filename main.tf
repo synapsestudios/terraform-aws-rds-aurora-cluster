@@ -19,7 +19,12 @@ resource "aws_rds_cluster" "this" {
   vpc_security_group_ids          = concat([aws_security_group.this.id], var.additional_security_groups)
   tags                            = var.tags
   db_cluster_parameter_group_name = var.db_cluster_parameter_group_name
-  deletion_protection             = true
+  deletion_protection             = var.deletion_protection
+  copy_tags_to_snapshot           = true
+
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+  ]
 }
 
 resource "aws_secretsmanager_secret" "connection_string" {

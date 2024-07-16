@@ -52,3 +52,9 @@ variable "instance_class" {
   description = "Instance class"
   default = "db.t4g.medium"
 }
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Enable deletion protection. DO NOT DISABLE IN PRODUCTION, THIS IS ONLY FOR TESTING."
+  default     = true
+}
