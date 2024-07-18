@@ -20,3 +20,13 @@ The secret stored inside is formatted as: postgresql://<username>:<password>@<en
 EOT
   value       = aws_secretsmanager_secret.connection_string.arn
 }
+
+output "root_credentials" {
+  description = "A map containing the username and password for the root user of the RDS cluster. Caution: This output will display the password in plain text."
+  value = {
+    username = aws_rds_cluster.this.master_username
+    password = data.aws_secretsmanager_secret_version.root_password.secret_string
+  }
+
+  sensitive = true
+}
