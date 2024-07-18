@@ -8,9 +8,9 @@ output "security_group_id" {
   value       = aws_security_group.this.id
 }
 
-output "root_password_secret_id" {
+output "root_password_id" {
   description = "The ID of the secret that stores the root password for the RDS cluster"
-  value       = data.aws_secretsmanager_secret_version.root_password.secret_id
+  value       = data.aws_secretsmanager_secret_version.root_password.id
 }
 
 output "connection_string_arn" {
