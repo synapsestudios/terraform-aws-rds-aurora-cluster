@@ -41,7 +41,7 @@ data "aws_secretsmanager_secret_version" "root_password" {
 
 resource "aws_secretsmanager_secret_version" "connection_string" {
   secret_id     = aws_secretsmanager_secret.connection_string.id
-  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${data.aws_secretsmanager_secret_version.root_password.secret_string}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
+  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${urlencode(jsondecode(data.aws_secretsmanager_secret_version.root_password.secret_string)["password"])}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
 }
 
 data "aws_iam_policy_document" "rds_monitoring" {
