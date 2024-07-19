@@ -1,11 +1,12 @@
 variable "name" {
   type        = string
-  description = "Determines naming convention of assets. Generally follows DNS naming convention."
+  description = "Determines naming convention of assets. Generally follows DNS naming convention. Service name or abbreviation."
 }
 
 variable "database_name" {
   type        = string
   description = "Name of the default database to create"
+  default     = "main"
 }
 
 variable "vpc_id" {
@@ -49,4 +50,11 @@ variable "db_cluster_parameter_group_name" {
 variable "instance_class" {
   type        = string
   description = "Instance class"
+  default     = "db.t4g.medium"
+}
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Enable deletion protection. DO NOT DISABLE IN PRODUCTION, THIS IS ONLY FOR TESTING."
+  default     = true
 }
