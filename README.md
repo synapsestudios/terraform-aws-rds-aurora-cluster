@@ -52,6 +52,7 @@ No modules.
 |------|-------------|
 | <a name="output_connection_string_arn"></a> [connection\_string\_arn](#output\_connection\_string\_arn) | The ARN of the secret that stores the connection string for the RDS cluster.<br>The secret stored inside is formatted as: postgresql://<username>:<password>@<endpoint>:<port>/<database> |
 | <a name="output_db_cluster_id"></a> [db\_cluster\_id](#output\_db\_cluster\_id) | The ID of the RDS cluster |
-| <a name="output_root_password_secret_id"></a> [root\_password\_secret\_id](#output\_root\_password\_secret\_id) | The ID of the secret that stores the root password for the RDS cluster |
+| <a name="output_root_credentials"></a> [root\_credentials](#output\_root\_credentials) | A map containing the username and password for the root user of the RDS cluster. Caution: This output will display the password in plain text. |
+| <a name="output_root_password_id"></a> [root\_password\_id](#output\_root\_password\_id) | The ID of the secret that stores the root password for the RDS cluster |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the EC2 security group that controls access to the RDS cluster |
 <!-- END_TF_DOCS -->
