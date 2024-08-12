@@ -5,7 +5,7 @@ resource "aws_rds_cluster" "this" {
   # checkov:skip=CKV_AWS_162: IAM Authentication does not fit into our use cases
   cluster_identifier_prefix       = var.name
   engine                          = "aurora-postgresql"
-  engine_version                  = "14.6"
+  engine_version                  = var.engine_version
   database_name                   = var.database_name
   skip_final_snapshot             = false
   final_snapshot_identifier       = "${var.name}-final"
@@ -67,7 +67,7 @@ resource "aws_rds_cluster_instance" "this" {
   # checkov:skip=CKV_AWS_354: We will use AWS managed keys because CMK are expensive and not necessary for our use case
   count                        = var.instance_count
   engine                       = "aurora-postgresql"
-  engine_version               = "14.6"
+  engine_version               = var.engine_version
   identifier_prefix            = "${var.name}-${count.index + 1}"
   cluster_identifier           = aws_rds_cluster.this.id
   instance_class               = var.instance_class

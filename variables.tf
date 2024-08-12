@@ -9,6 +9,12 @@ variable "database_name" {
   default     = "main"
 }
 
+variable "engine_version" {
+  type        = string
+  description = "The engine version to use"
+  default     = "14"
+}
+
 variable "vpc_id" {
   type        = string
   description = "The ID of the vpc the database belongs to"
