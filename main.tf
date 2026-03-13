@@ -94,20 +94,26 @@ resource "aws_security_group" "this" {
   description = "Database traffic rules"
   vpc_id      = var.vpc_id
   tags        = merge(var.tags, { name = "database" })
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.database_vpc.cidr_block]
-    description = "PostgreSQL traffic in"
-  }
-  egress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.database_vpc.cidr_block]
-    description = "PostgreSQL traffic out"
-  }
+}
+
+resource "aws_security_group_rule" "ingress" {
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.database_vpc.cidr_block]
+  description       = "PostgreSQL traffic in"
+  security_group_id = aws_security_group.this.id
+}
+
+resource "aws_security_group_rule" "egress" {
+  type              = "egress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.database_vpc.cidr_block]
+  description       = "PostgreSQL traffic out"
+  security_group_id = aws_security_group.this.id
 }
 
 data "aws_vpc" "database_vpc" {
