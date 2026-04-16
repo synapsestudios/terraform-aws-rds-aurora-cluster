@@ -3,13 +3,16 @@
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
 
 ## Modules
 
@@ -23,8 +26,6 @@ No modules.
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_rds_cluster.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster) | resource |
 | [aws_rds_cluster_instance.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance) | resource |
-| [aws_secretsmanager_secret.connection_string](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
-| [aws_secretsmanager_secret_version.connection_string](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
@@ -46,6 +47,7 @@ No modules.
 | <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | Instance class | `string` | `"db.t4g.medium"` | no |
 | <a name="input_instance_count"></a> [instance\_count](#input\_instance\_count) | How many RDS instances to create | `number` | `1` | no |
 | <a name="input_name"></a> [name](#input\_name) | Determines naming convention of assets. Generally follows DNS naming convention. Service name or abbreviation. | `string` | n/a | yes |
+| <a name="input_snapshot_identifier"></a> [snapshot\_identifier](#input\_snapshot\_identifier) | Identifier of a DB cluster snapshot to restore from. When set, database\_name and master\_username are ignored (the snapshot's values are used). | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the AWS resources. | `map(string)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the vpc the database belongs to | `string` | n/a | yes |
 
@@ -53,8 +55,13 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_connection_string_arn"></a> [connection\_string\_arn](#output\_connection\_string\_arn) | The ARN of the secret that stores the connection string for the RDS cluster.<br/>The secret stored inside is formatted as: postgresql://<username>:<password>@<endpoint>:<port>/<database> |
+| <a name="output_database_name"></a> [database\_name](#output\_database\_name) | The name of the default database. Null when the cluster was restored from a snapshot — the restored databases exist at the Postgres layer and are not exposed via the RDS API. |
 | <a name="output_db_cluster_id"></a> [db\_cluster\_id](#output\_db\_cluster\_id) | The ID of the RDS cluster |
+| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | The writer endpoint of the RDS cluster |
+| <a name="output_master_user_secret_arn"></a> [master\_user\_secret\_arn](#output\_master\_user\_secret\_arn) | The ARN of the AWS-managed secret containing the master user credentials. Rotates automatically; prefer reading this over caching a derived connection string.<br/><br/>Note: these are master/root credentials and are not intended for application access. Applications should connect using a dedicated, least-privilege database user created at the Postgres layer. The master credentials are reserved for real-user/operator interaction (DBA operations, break-glass access, initial provisioning of app users). |
+| <a name="output_master_username"></a> [master\_username](#output\_master\_username) | The master username for the RDS cluster |
+| <a name="output_port"></a> [port](#output\_port) | The port the RDS cluster accepts connections on |
+| <a name="output_reader_endpoint"></a> [reader\_endpoint](#output\_reader\_endpoint) | The read-only endpoint of the RDS cluster |
 | <a name="output_root_credentials"></a> [root\_credentials](#output\_root\_credentials) | A map containing the username and password for the root user of the RDS cluster. Caution: This output will display the password in plain text. |
 | <a name="output_root_password_id"></a> [root\_password\_id](#output\_root\_password\_id) | The ID of the secret that stores the root password for the RDS cluster |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the EC2 security group that controls access to the RDS cluster |
