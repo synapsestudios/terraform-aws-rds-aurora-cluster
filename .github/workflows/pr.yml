@@ -11,11 +11,11 @@ permissions:
   pull-requests: write
   security-events: write
 jobs:
-  terraform-format-test:
-    uses: ./.github/workflows/tf-format.yml
+  fast-checks:
+    uses: ./.github/workflows/fast_checks.yml
   terraform-docs:
-    needs: [terraform-format-test]
+    needs: [fast-checks]
     uses: ./.github/workflows/tf-docs.yml
   tfscan:
-    needs: [terraform-format-test, terraform-docs]
+    needs: [fast-checks, terraform-docs]
     uses: synapsestudios/.github/.github/workflows/tf-scan.yml@master
