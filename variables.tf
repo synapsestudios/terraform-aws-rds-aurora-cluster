@@ -64,3 +64,9 @@ variable "deletion_protection" {
   description = "Enable deletion protection. DO NOT DISABLE IN PRODUCTION, THIS IS ONLY FOR TESTING."
   default     = true
 }
+
+variable "snapshot_identifier" {
+  type        = string
+  default     = null
+  description = "Identifier of a DB cluster snapshot to restore from. When set, database_name and master_username are ignored (the snapshot's values are used)."
+}

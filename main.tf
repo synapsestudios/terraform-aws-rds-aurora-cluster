@@ -6,11 +6,12 @@ resource "aws_rds_cluster" "this" {
   cluster_identifier_prefix       = var.name
   engine                          = "aurora-postgresql"
   engine_version                  = var.engine_version
-  database_name                   = var.database_name
+  database_name                   = var.snapshot_identifier == null ? var.database_name : null
   skip_final_snapshot             = false
   final_snapshot_identifier       = "${var.name}-final"
-  master_username                 = "root"
+  master_username                 = var.snapshot_identifier == null ? "root" : null
   manage_master_user_password     = true
+  snapshot_identifier             = var.snapshot_identifier
   db_subnet_group_name            = aws_db_subnet_group.this.name
   storage_encrypted               = true
   availability_zones              = var.availability_zones
@@ -25,23 +26,16 @@ resource "aws_rds_cluster" "this" {
   enabled_cloudwatch_logs_exports = [
     "postgresql",
   ]
-}
 
-resource "aws_secretsmanager_secret" "connection_string" {
-  # checkov:skip=CKV2_AWS_57: RDS connection strings cannot be rotated
-  # checkov:skip=CKV_AWS_149: We will use AWS managed keys because CMK are expensive and not necessary for our use case
-  name_prefix = "aurora-connectionstring-${var.name}"
-  description = "Connection String for the ${var.name} aurora cluster database"
-  tags        = var.tags
+  lifecycle {
+    # snapshot_identifier is only meaningful on create; ignoring it prevents
+    # Terraform from planning to re-restore the cluster on subsequent applies.
+    ignore_changes = [snapshot_identifier]
+  }
 }
 
 data "aws_secretsmanager_secret_version" "root_password" {
   secret_id = aws_rds_cluster.this.master_user_secret[0].secret_arn
-}
-
-resource "aws_secretsmanager_secret_version" "connection_string" {
-  secret_id     = aws_secretsmanager_secret.connection_string.id
-  secret_string = "postgresql://${aws_rds_cluster.this.master_username}:${urlencode(jsondecode(data.aws_secretsmanager_secret_version.root_password.secret_string)["password"])}@${aws_rds_cluster.this.endpoint}:${aws_rds_cluster.this.port}/${aws_rds_cluster.this.database_name}"
 }
 
 data "aws_iam_policy_document" "rds_monitoring" {
