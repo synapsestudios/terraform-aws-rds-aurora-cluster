@@ -1,5 +1,34 @@
 # terraform-aws-rds-aurora-cluster
 
+## Upgrading from < v3.1.0
+
+v3.1.0 migrates the Postgres SG rules from the legacy `aws_security_group_rule` to the current-best-practice `aws_vpc_security_group_{ingress,egress}_rule` resources. To upgrade without a connectivity gap, look up the existing rule IDs and pass them once via `legacy_rule_ids`:
+
+```sh
+aws ec2 describe-security-group-rules \
+  --filters Name=group-id,Values=<output.security_group_id> \
+  --query 'SecurityGroupRules[?FromPort==`5432`].[SecurityGroupRuleId,IsEgress]' \
+  --output text
+```
+
+Then for one apply:
+
+```hcl
+module "aurora" {
+  source = "..."
+  # ...
+
+  legacy_rule_ids = {
+    ingress = "sgr-0abc..."  # IsEgress = false
+    egress  = "sgr-0def..."  # IsEgress = true
+  }
+}
+```
+
+Terraform adopts the existing rules into the new resource addresses — zero AWS-side changes, zero connectivity gap. Remove the `legacy_rule_ids` argument on the next apply.
+
+Fresh installs ignore this argument entirely.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
