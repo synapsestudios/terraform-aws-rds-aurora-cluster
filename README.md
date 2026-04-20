@@ -1,52 +1,5 @@
 # terraform-aws-rds-aurora-cluster
 
-## Upgrading from < v3.1.0
-
-v3.1.0 migrates the Postgres SG rules from the legacy `aws_security_group_rule` to the current-best-practice `aws_vpc_security_group_{ingress,egress}_rule` resources. The state addresses change, so without action Terraform will plan to destroy the existing rules and create new ones — a connectivity gap on a hot path.
-
-The migration must be declared in the **consumer's root module**, not here. Terraform's `import` blocks in a child module cannot be driven by per-consumer runtime values (see [hashicorp/terraform#33474](https://github.com/hashicorp/terraform/issues/33474)), so the earlier in-module `legacy_rule_ids` approach has been dropped.
-
-### One-time upgrade steps
-
-1. Look up the existing rule IDs for the cluster's security group:
-
-    ```sh
-    aws ec2 describe-security-group-rules \
-      --filters Name=group-id,Values=<module.aurora.security_group_id> \
-      --query 'SecurityGroupRules[?FromPort==`5432`].[SecurityGroupRuleId,IsEgress]' \
-      --output text
-    ```
-
-2. In your **root module** (not inside this module), add four blocks for a single apply:
-
-    ```hcl
-    import {
-      to = module.aurora.aws_vpc_security_group_ingress_rule.postgres
-      id = "sgr-0abc..."  # IsEgress = false
-    }
-
-    import {
-      to = module.aurora.aws_vpc_security_group_egress_rule.postgres
-      id = "sgr-0def..."  # IsEgress = true
-    }
-
-    removed {
-      from = module.aurora.aws_security_group_rule.ingress
-      lifecycle { destroy = false }
-    }
-
-    removed {
-      from = module.aurora.aws_security_group_rule.egress
-      lifecycle { destroy = false }
-    }
-    ```
-
-3. Run `terraform apply`. Terraform adopts the existing AWS rules into the new resource addresses and drops the old state entries without destroying — zero AWS-side changes, zero connectivity gap.
-
-4. Delete all four blocks from the root module on the next apply.
-
-Fresh installs don't need any of this.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
