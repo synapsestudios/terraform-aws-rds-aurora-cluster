@@ -90,24 +90,50 @@ resource "aws_security_group" "this" {
   tags        = merge(var.tags, { name = "database" })
 }
 
-resource "aws_security_group_rule" "ingress" {
-  type              = "ingress"
+resource "aws_vpc_security_group_ingress_rule" "postgres" {
+  security_group_id = aws_security_group.this.id
+  cidr_ipv4         = data.aws_vpc.database_vpc.cidr_block
   from_port         = 5432
   to_port           = 5432
-  protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.database_vpc.cidr_block]
+  ip_protocol       = "tcp"
   description       = "PostgreSQL traffic in"
-  security_group_id = aws_security_group.this.id
+  tags              = var.tags
 }
 
-resource "aws_security_group_rule" "egress" {
-  type              = "egress"
+resource "aws_vpc_security_group_egress_rule" "postgres" {
+  security_group_id = aws_security_group.this.id
+  cidr_ipv4         = data.aws_vpc.database_vpc.cidr_block
   from_port         = 5432
   to_port           = 5432
-  protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.database_vpc.cidr_block]
+  ip_protocol       = "tcp"
   description       = "PostgreSQL traffic out"
-  security_group_id = aws_security_group.this.id
+  tags              = var.tags
+}
+
+import {
+  for_each = var.legacy_rule_ids.ingress != null ? toset([var.legacy_rule_ids.ingress]) : toset([])
+  to       = aws_vpc_security_group_ingress_rule.postgres
+  id       = each.value
+}
+
+import {
+  for_each = var.legacy_rule_ids.egress != null ? toset([var.legacy_rule_ids.egress]) : toset([])
+  to       = aws_vpc_security_group_egress_rule.postgres
+  id       = each.value
+}
+
+removed {
+  from = aws_security_group_rule.ingress
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = aws_security_group_rule.egress
+  lifecycle {
+    destroy = false
+  }
 }
 
 data "aws_vpc" "database_vpc" {

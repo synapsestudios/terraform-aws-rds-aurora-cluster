@@ -91,6 +91,54 @@ run "restore_from_snapshot_passes_identifier_through" {
   }
 }
 
+run "sg_ingress_postgres_from_vpc_cidr" {
+  command = plan
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.postgres.from_port == 5432
+    error_message = "Postgres ingress from_port should be 5432"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.postgres.to_port == 5432
+    error_message = "Postgres ingress to_port should be 5432"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.postgres.ip_protocol == "tcp"
+    error_message = "Postgres ingress ip_protocol should be tcp"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.postgres.cidr_ipv4 == data.aws_vpc.database_vpc.cidr_block
+    error_message = "Postgres ingress cidr_ipv4 should equal the VPC CIDR"
+  }
+}
+
+run "sg_egress_postgres_to_vpc_cidr" {
+  command = plan
+
+  assert {
+    condition     = aws_vpc_security_group_egress_rule.postgres.from_port == 5432
+    error_message = "Postgres egress from_port should be 5432"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_egress_rule.postgres.to_port == 5432
+    error_message = "Postgres egress to_port should be 5432"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_egress_rule.postgres.ip_protocol == "tcp"
+    error_message = "Postgres egress ip_protocol should be tcp"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_egress_rule.postgres.cidr_ipv4 == data.aws_vpc.database_vpc.cidr_block
+    error_message = "Postgres egress cidr_ipv4 should equal the VPC CIDR"
+  }
+}
+
 # Note: we don't assert that database_name/master_username are null on the
 # cluster resource when snapshot_identifier is set. Under `command = plan`,
 # those attributes read as "(known after apply)" because the AWS API populates
