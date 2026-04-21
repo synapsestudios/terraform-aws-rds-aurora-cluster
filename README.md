@@ -1,34 +1,5 @@
 # terraform-aws-rds-aurora-cluster
 
-## Upgrading from < v3.1.0
-
-v3.1.0 migrates the Postgres SG rules from the legacy `aws_security_group_rule` to the current-best-practice `aws_vpc_security_group_{ingress,egress}_rule` resources. To upgrade without a connectivity gap, look up the existing rule IDs and pass them once via `legacy_rule_ids`:
-
-```sh
-aws ec2 describe-security-group-rules \
-  --filters Name=group-id,Values=<output.security_group_id> \
-  --query 'SecurityGroupRules[?FromPort==`5432`].[SecurityGroupRuleId,IsEgress]' \
-  --output text
-```
-
-Then for one apply:
-
-```hcl
-module "aurora" {
-  source = "..."
-  # ...
-
-  legacy_rule_ids = {
-    ingress = "sgr-0abc..."  # IsEgress = false
-    egress  = "sgr-0def..."  # IsEgress = true
-  }
-}
-```
-
-Terraform adopts the existing rules into the new resource addresses — zero AWS-side changes, zero connectivity gap. Remove the `legacy_rule_ids` argument on the next apply.
-
-Fresh installs ignore this argument entirely.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -75,7 +46,6 @@ No modules.
 | <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | The engine version to use | `string` | `"14"` | no |
 | <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | Instance class | `string` | `"db.t4g.medium"` | no |
 | <a name="input_instance_count"></a> [instance\_count](#input\_instance\_count) | How many RDS instances to create | `number` | `1` | no |
-| <a name="input_legacy_rule_ids"></a> [legacy\_rule\_ids](#input\_legacy\_rule\_ids) | One-time zero-gap migration helper for upgrading from pre-v3.1.0 releases<br/>that managed the Postgres SG rules via `aws_security_group_rule`. Populate<br/>with the AWS-assigned rule IDs (format: sgr-xxxxxxxxxxxxx) of the existing<br/>ingress and egress rules to have Terraform adopt them as the new<br/>`aws_vpc_security_group_{ingress,egress}_rule` resources instead of<br/>destroying and recreating them.<br/><br/>Find the IDs with:<br/><br/>    aws ec2 describe-security-group-rules \<br/>      --filters Name=group-id,Values=<module.aurora.security\_group\_id><br/><br/>Leave empty on fresh installs. Remove the argument on the apply *after*<br/>the migration succeeds. | <pre>object({<br/>    ingress = optional(string)<br/>    egress  = optional(string)<br/>  })</pre> | `{}` | no |
 | <a name="input_name"></a> [name](#input\_name) | Determines naming convention of assets. Generally follows DNS naming convention. Service name or abbreviation. | `string` | n/a | yes |
 | <a name="input_snapshot_identifier"></a> [snapshot\_identifier](#input\_snapshot\_identifier) | Identifier of a DB cluster snapshot to restore from. When set, database\_name and master\_username are ignored (the snapshot's values are used). | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the AWS resources. | `map(string)` | `{}` | no |

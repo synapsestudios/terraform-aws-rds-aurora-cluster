@@ -70,27 +70,3 @@ variable "snapshot_identifier" {
   default     = null
   description = "Identifier of a DB cluster snapshot to restore from. When set, database_name and master_username are ignored (the snapshot's values are used)."
 }
-
-variable "legacy_rule_ids" {
-  type = object({
-    ingress = optional(string)
-    egress  = optional(string)
-  })
-  default     = {}
-  description = <<-EOT
-    One-time zero-gap migration helper for upgrading from pre-v3.1.0 releases
-    that managed the Postgres SG rules via `aws_security_group_rule`. Populate
-    with the AWS-assigned rule IDs (format: sgr-xxxxxxxxxxxxx) of the existing
-    ingress and egress rules to have Terraform adopt them as the new
-    `aws_vpc_security_group_{ingress,egress}_rule` resources instead of
-    destroying and recreating them.
-
-    Find the IDs with:
-
-        aws ec2 describe-security-group-rules \
-          --filters Name=group-id,Values=<module.aurora.security_group_id>
-
-    Leave empty on fresh installs. Remove the argument on the apply *after*
-    the migration succeeds.
-  EOT
-}
