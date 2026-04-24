@@ -139,6 +139,20 @@ run "sg_egress_postgres_to_vpc_cidr" {
   }
 }
 
+run "rds_monitoring_role_has_enhanced_monitoring_policy_attached" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.rds_monitoring.role == aws_iam_role.this.name
+    error_message = "Enhanced monitoring policy attachment should target the module's IAM role"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.rds_monitoring.policy_arn == "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+    error_message = "Enhanced monitoring policy attachment should attach the AWS-managed AmazonRDSEnhancedMonitoringRole policy"
+  }
+}
+
 # Note: we don't assert that database_name/master_username are null on the
 # cluster resource when snapshot_identifier is set. Under `command = plan`,
 # those attributes read as "(known after apply)" because the AWS API populates

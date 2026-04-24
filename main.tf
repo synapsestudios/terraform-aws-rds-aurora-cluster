@@ -52,9 +52,13 @@ data "aws_iam_policy_document" "rds_monitoring" {
 }
 
 resource "aws_iam_role" "this" {
-  name                = "${var.name}-rds-monitoring-role"
-  assume_role_policy  = data.aws_iam_policy_document.rds_monitoring.json
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"]
+  name               = "${var.name}-rds-monitoring-role"
+  assume_role_policy = data.aws_iam_policy_document.rds_monitoring.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds_monitoring" {
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
 resource "aws_rds_cluster_instance" "this" {
