@@ -59,6 +59,7 @@ No modules.
 | <a name="output_database_name"></a> [database\_name](#output\_database\_name) | The name of the default database. Null when the cluster was restored from a snapshot — the restored databases exist at the Postgres layer and are not exposed via the RDS API. |
 | <a name="output_db_cluster_id"></a> [db\_cluster\_id](#output\_db\_cluster\_id) | The ID of the RDS cluster |
 | <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | The writer endpoint of the RDS cluster |
+| <a name="output_instance_identifiers"></a> [instance\_identifiers](#output\_instance\_identifiers) | The identifiers of the cluster instances, in instance order |
 | <a name="output_master_user_secret_arn"></a> [master\_user\_secret\_arn](#output\_master\_user\_secret\_arn) | The ARN of the AWS-managed secret containing the master user credentials. Rotates automatically; prefer reading this over caching a derived connection string.<br/><br/>Note: these are master/root credentials and are not intended for application access. Applications should connect using a dedicated, least-privilege database user created at the Postgres layer. The master credentials are reserved for real-user/operator interaction (DBA operations, break-glass access, initial provisioning of app users). |
 | <a name="output_master_username"></a> [master\_username](#output\_master\_username) | The master username for the RDS cluster |
 | <a name="output_port"></a> [port](#output\_port) | The port the RDS cluster accepts connections on |

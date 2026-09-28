@@ -3,6 +3,11 @@ output "db_cluster_id" {
   value       = aws_rds_cluster.this.cluster_identifier
 }
 
+output "instance_identifiers" {
+  description = "The identifiers of the cluster instances, in instance order"
+  value       = aws_rds_cluster_instance.this[*].identifier
+}
+
 output "security_group_id" {
   description = "The ID of the EC2 security group that controls access to the RDS cluster"
   value       = aws_security_group.this.id

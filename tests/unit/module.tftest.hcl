@@ -153,6 +153,19 @@ run "rds_monitoring_role_has_enhanced_monitoring_policy_attached" {
   }
 }
 
+run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_known" {
+  command = plan
+
+  variables {
+    instance_count = 2
+  }
+
+  assert {
+    condition     = length(output.instance_identifiers) == 2
+    error_message = "Callers key per-instance resources on this list, so its length must be known at plan"
+  }
+}
+
 # Note: we don't assert that database_name/master_username are null on the
 # cluster resource when snapshot_identifier is set. Under `command = plan`,
 # those attributes read as "(known after apply)" because the AWS API populates
