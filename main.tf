@@ -94,14 +94,16 @@ resource "aws_security_group" "this" {
   tags        = merge(var.tags, { name = "database" })
 }
 
-resource "aws_vpc_security_group_ingress_rule" "postgres" {
-  security_group_id = aws_security_group.this.id
-  cidr_ipv4         = data.aws_vpc.database_vpc.cidr_block
-  from_port         = 5432
-  to_port           = 5432
-  ip_protocol       = "tcp"
-  description       = "PostgreSQL traffic in"
-  tags              = var.tags
+resource "aws_vpc_security_group_ingress_rule" "allowed_security_group" {
+  for_each = var.allowed_security_group_ids
+
+  security_group_id            = aws_security_group.this.id
+  referenced_security_group_id = each.value
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  description                  = "PostgreSQL traffic in from ${each.key}"
+  tags                         = var.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "postgres" {

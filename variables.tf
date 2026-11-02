@@ -36,6 +36,12 @@ variable "additional_security_groups" {
   description = "Any additional security groups the cluster should be added to"
 }
 
+variable "allowed_security_group_ids" {
+  type        = map(string)
+  default     = {}
+  description = "Security groups allowed to reach the cluster on 5432, keyed by a name for each source. Keys go into the rule descriptions and must be known at plan. IDs can stay unknown until apply. Clients in other root modules can add their own rules on the security_group_id output instead."
+}
+
 variable "tags" {
   type        = map(string)
   description = "A mapping of tags to assign to the AWS resources."
