@@ -6,16 +6,11 @@ on:
       - "*/*"
       - "**"
 permissions:
-  actions: read
   contents: write
   pull-requests: write
-  security-events: write
 jobs:
   fast-checks:
     uses: ./.github/workflows/fast_checks.yml
   terraform-docs:
     needs: [fast-checks]
     uses: ./.github/workflows/tf-docs.yml
-  tfscan:
-    needs: [fast-checks, terraform-docs]
-    uses: synapsestudios/.github/.github/workflows/tf-scan.yml@master
