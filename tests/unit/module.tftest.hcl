@@ -91,27 +91,63 @@ run "restore_from_snapshot_passes_identifier_through" {
   }
 }
 
-run "sg_ingress_postgres_from_vpc_cidr" {
+run "no_ingress_by_default" {
   command = plan
 
   assert {
-    condition     = aws_vpc_security_group_ingress_rule.postgres.from_port == 5432
-    error_message = "Postgres ingress from_port should be 5432"
+    condition     = length(aws_vpc_security_group_ingress_rule.allowed_security_group) == 0
+    error_message = "The cluster's security group should admit nothing unless allowed_security_group_ids names a source"
+  }
+}
+
+run "one_ingress_rule_per_allowed_security_group" {
+  command = plan
+
+  variables {
+    allowed_security_group_ids = {
+      api    = "sg-11111111"
+      worker = "sg-22222222"
+    }
   }
 
   assert {
-    condition     = aws_vpc_security_group_ingress_rule.postgres.to_port == 5432
-    error_message = "Postgres ingress to_port should be 5432"
+    condition     = toset(keys(aws_vpc_security_group_ingress_rule.allowed_security_group)) == toset(["api", "worker"])
+    error_message = "There should be one ingress rule per allowed_security_group_ids entry, keyed by the entry's name"
   }
 
   assert {
-    condition     = aws_vpc_security_group_ingress_rule.postgres.ip_protocol == "tcp"
-    error_message = "Postgres ingress ip_protocol should be tcp"
+    condition = alltrue([
+      for key, rule in aws_vpc_security_group_ingress_rule.allowed_security_group :
+      rule.referenced_security_group_id == var.allowed_security_group_ids[key]
+    ])
+    error_message = "Each ingress rule should admit the security group its entry names"
   }
 
   assert {
-    condition     = aws_vpc_security_group_ingress_rule.postgres.cidr_ipv4 == data.aws_vpc.database_vpc.cidr_block
-    error_message = "Postgres ingress cidr_ipv4 should equal the VPC CIDR"
+    condition = alltrue([
+      for rule in aws_vpc_security_group_ingress_rule.allowed_security_group :
+      rule.from_port == 5432 && rule.to_port == 5432 && rule.ip_protocol == "tcp"
+    ])
+    error_message = "Each ingress rule should admit PostgreSQL only, TCP 5432"
+  }
+
+  assert {
+    condition = alltrue([
+      for key, rule in aws_vpc_security_group_ingress_rule.allowed_security_group :
+      strcontains(rule.description, key)
+    ])
+    error_message = "Each ingress rule's description should name its source"
+  }
+}
+
+# Callers often create a client's security group in the same apply as the
+# cluster, so its ID is unknown at plan. for_each over the IDs themselves
+# would fail to plan there. The plan succeeding is the assertion.
+run "plans_when_allowed_security_group_ids_are_unknown" {
+  command = plan
+
+  module {
+    source = "./tests/unit/fixtures/client_in_same_apply"
   }
 }
 
