@@ -202,6 +202,25 @@ run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_
   }
 }
 
+# RDS stores the managed master credentials as JSON with username and password
+# keys. The secret's ARN is unknown at plan, so the secret is only read at
+# apply.
+run "root_credentials_password_is_the_password_alone" {
+  command = apply
+
+  override_data {
+    target = data.aws_secretsmanager_secret_version.root_password
+    values = {
+      secret_string = "{\"username\":\"root\",\"password\":\"from-the-secret\"}"
+    }
+  }
+
+  assert {
+    condition     = output.root_credentials.password == "from-the-secret"
+    error_message = "root_credentials.password should be the secret's password key, not the whole JSON string"
+  }
+}
+
 # Note: we don't assert that database_name/master_username are null on the
 # cluster resource when snapshot_identifier is set. Under `command = plan`,
 # those attributes read as "(known after apply)" because the AWS API populates
