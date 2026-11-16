@@ -111,7 +111,7 @@ run "mock" {
   }
 
   assert {
-    condition     = can(cidrhost(aws_vpc_security_group_ingress_rule.postgres.cidr_ipv4, 0))
+    condition     = can(cidrhost(aws_vpc_security_group_egress_rule.postgres.cidr_ipv4, 0))
     error_message = "The VPC CIDR the security group rules use should be a valid CIDR block"
   }
 }
@@ -149,7 +149,7 @@ run "emulator" {
   }
 
   assert {
-    condition     = can(cidrhost(aws_vpc_security_group_ingress_rule.postgres.cidr_ipv4, 0))
+    condition     = can(cidrhost(aws_vpc_security_group_egress_rule.postgres.cidr_ipv4, 0))
     error_message = "The VPC CIDR the security group rules use should be a valid CIDR block"
   }
 }

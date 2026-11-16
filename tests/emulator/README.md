@@ -22,10 +22,10 @@ A full run takes about nine minutes. Most of that is the AWS provider's fixed 30
 
 | File                      | Purpose                                                               |
 | ------------------------- | --------------------------------------------------------------------- |
-| `lifecycle.tftest.hcl`    | Create, add an instance, destroy                                      |
+| `lifecycle.tftest.hcl`    | Create, add an instance, admit a client security group, destroy       |
 | `restore.tftest.hcl`      | Restore from a snapshot                                               |
 | `contract.tftest.hcl`     | Checks that the mock overrides in `tests/unit/` match the emulator    |
-| `setup/`                  | Default VPC lookup and a cluster parameter group                      |
+| `setup/`                  | Default VPC lookup, a parameter group, and a client security group    |
 | `snapshot_source/`        | A cluster and snapshot for the restore test                           |
 | `proxy.py`                | Pass-through proxy with one workaround                                |
 

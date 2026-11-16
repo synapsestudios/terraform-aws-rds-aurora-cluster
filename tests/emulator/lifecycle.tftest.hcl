@@ -61,11 +61,6 @@ run "creates_a_cluster_with_one_writer" {
   }
 
   assert {
-    condition     = aws_vpc_security_group_ingress_rule.postgres.cidr_ipv4 == run.setup.vpc_cidr_block
-    error_message = "Postgres ingress should allow the CIDR of the VPC passed in as vpc_id"
-  }
-
-  assert {
     condition     = aws_vpc_security_group_egress_rule.postgres.cidr_ipv4 == run.setup.vpc_cidr_block
     error_message = "Postgres egress should allow the CIDR of the VPC passed in as vpc_id"
   }
@@ -105,5 +100,35 @@ run "adds_a_second_instance_without_replacing_the_cluster" {
   assert {
     condition     = startswith(output.instance_identifiers[1], "lifecycle-2")
     error_message = "The second instance identifier should start with <name>-2, got ${output.instance_identifiers[1]}"
+  }
+}
+
+run "admits_a_new_client_without_replacing_the_cluster" {
+  command = apply
+
+  variables {
+    vpc_id                          = run.setup.vpc_id
+    availability_zones              = run.setup.availability_zones
+    database_subnets                = run.setup.subnet_ids
+    db_cluster_parameter_group_name = run.setup.db_cluster_parameter_group_name
+    instance_count                  = 2
+    allowed_security_group_ids = {
+      app = run.setup.client_security_group_id
+    }
+  }
+
+  assert {
+    condition     = output.db_cluster_id == run.creates_a_cluster_with_one_writer.db_cluster_id
+    error_message = "Adding an allowed security group should not replace the cluster"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.allowed_security_group["app"].referenced_security_group_id == run.setup.client_security_group_id
+    error_message = "The ingress rule should admit the client security group"
+  }
+
+  assert {
+    condition     = aws_vpc_security_group_ingress_rule.allowed_security_group["app"].security_group_id == output.security_group_id
+    error_message = "The ingress rule should belong to the cluster's security group"
   }
 }

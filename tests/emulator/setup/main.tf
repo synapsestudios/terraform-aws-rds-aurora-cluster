@@ -35,6 +35,13 @@ resource "aws_rds_cluster_parameter_group" "this" {
   family      = "aurora-postgresql14"
 }
 
+# Stands in for an application's security group, for the ingress test.
+resource "aws_security_group" "client" {
+  name_prefix = "emulator-test-client"
+  description = "Client allowed to reach the test cluster"
+  vpc_id      = data.aws_vpc.default.id
+}
+
 output "vpc_id" {
   value = data.aws_vpc.default.id
 }
@@ -53,4 +60,8 @@ output "subnet_ids" {
 
 output "db_cluster_parameter_group_name" {
   value = aws_rds_cluster_parameter_group.this.name
+}
+
+output "client_security_group_id" {
+  value = aws_security_group.client.id
 }
