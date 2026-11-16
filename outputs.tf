@@ -3,6 +3,11 @@ output "db_cluster_id" {
   value       = aws_rds_cluster.this.cluster_identifier
 }
 
+output "final_snapshot_identifier" {
+  description = "The name of the snapshot RDS takes when this cluster is destroyed or replaced. Each cluster gets its own name, so a replacement changes this value."
+  value       = aws_rds_cluster.this.final_snapshot_identifier
+}
+
 output "instance_identifiers" {
   description = "The identifiers of the cluster instances, in instance order"
   value       = aws_rds_cluster_instance.this[*].identifier

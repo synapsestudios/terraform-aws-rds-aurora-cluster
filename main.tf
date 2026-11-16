@@ -8,7 +8,7 @@ resource "aws_rds_cluster" "this" {
   engine_version                  = var.engine_version
   database_name                   = var.snapshot_identifier == null ? var.database_name : null
   skip_final_snapshot             = false
-  final_snapshot_identifier       = "${var.name}-final"
+  final_snapshot_identifier       = "${var.name}-final-${substr(uuid(), 0, 8)}"
   master_username                 = var.snapshot_identifier == null ? "root" : null
   manage_master_user_password     = true
   snapshot_identifier             = var.snapshot_identifier
@@ -30,7 +30,12 @@ resource "aws_rds_cluster" "this" {
   lifecycle {
     # snapshot_identifier is only meaningful on create; ignoring it prevents
     # Terraform from planning to re-restore the cluster on subsequent applies.
-    ignore_changes = [snapshot_identifier]
+    #
+    # final_snapshot_identifier calls uuid(), which returns a new value on
+    # every plan. Ignoring it keeps the name a cluster got when it was created.
+    # A replacement evaluates uuid() again, so the new cluster's final snapshot
+    # can't collide with the one the old cluster left behind.
+    ignore_changes = [snapshot_identifier, final_snapshot_identifier]
   }
 }
 
