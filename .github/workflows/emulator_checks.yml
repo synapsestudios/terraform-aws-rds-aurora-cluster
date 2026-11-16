@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     # Spike for issue #22. Failures here don't block the pull request.
     continue-on-error: true
-    env:
-      EMULATOR_VERSION: 1.0.385
-      EMULATOR_PACKAGE: aws-emulator_1.0.385-1_amd64.deb
 
     steps:
       - name: Checkout
@@ -23,16 +20,12 @@ jobs:
           terraform_version: 1.13.4
           terraform_wrapper: false
 
+      # run.sh starts the emulator itself, behind the proxy, so this only installs it.
       - name: Install AWS Emulator
-        run: |
-          base=https://downloads.aws.com/aws-emulator/packages/aws-emulator/LTS
-          curl -fsSLO "$base/$EMULATOR_PACKAGE"
-          curl -fsSLO "$base/$EMULATOR_PACKAGE.sig"
-          curl -fsSLo aws-publishing.asc https://downloads.aws.com/keys/gpg/current.asc
-          gpg --import aws-publishing.asc
-          gpg --fingerprint ssm-publishing@amazon.com | grep -q "98BC F336 A3BE 53B7 34E9  67C5 2E5B F49B D940 F624"
-          gpg --verify "$EMULATOR_PACKAGE.sig" "$EMULATOR_PACKAGE"
-          sudo apt-get install -y "./$EMULATOR_PACKAGE"
+        uses: synapsestudios/setup-aws-emulator@7819367a0b09b4ac4c69386fc1557784c4ada560 # v1.0.1
+        with:
+          version: 1.0.385
+          start: false
 
       - name: Terraform Test
         run: tests/emulator/run.sh
