@@ -227,3 +227,45 @@ run "root_credentials_password_is_the_password_alone" {
 # them from the snapshot. Under `command = apply`, the mock provider replaces
 # nulls with fabricated strings. The conditional null-ing is trivially readable
 # in main.tf — tests can't add confidence here without asserting against mocks.
+
+# The runs below apply against the mock provider and share state, so each run
+# starts from the cluster the run before it left behind.
+run "final_snapshot_name_ends_in_a_suffix" {
+  command = apply
+
+  assert {
+    condition     = can(regex("^test-cluster-final-[0-9a-f]{8}$", output.final_snapshot_identifier))
+    error_message = "The final snapshot name should be the cluster name, then -final-, then an 8 character suffix"
+  }
+}
+
+run "final_snapshot_name_survives_an_update_in_place" {
+  command = apply
+
+  variables {
+    tags = {
+      Team = "data"
+    }
+  }
+
+  assert {
+    condition     = output.final_snapshot_identifier == run.final_snapshot_name_ends_in_a_suffix.final_snapshot_identifier
+    error_message = "An update that keeps the cluster should keep its final snapshot name, or every plan would show a change"
+  }
+}
+
+# Replacing the cluster destroys the old one, which takes its final snapshot.
+# The new cluster needs a different name or its own destroy fails with
+# DBClusterSnapshotAlreadyExistsFault.
+run "final_snapshot_name_changes_when_the_cluster_is_replaced" {
+  command = apply
+
+  plan_options {
+    replace = [aws_rds_cluster.this]
+  }
+
+  assert {
+    condition     = output.final_snapshot_identifier != run.final_snapshot_name_survives_an_update_in_place.final_snapshot_identifier
+    error_message = "A replaced cluster should get a new final snapshot name, because the old cluster's snapshot already holds the old one"
+  }
+}
