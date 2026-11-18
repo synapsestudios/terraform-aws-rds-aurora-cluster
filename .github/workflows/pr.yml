@@ -11,6 +11,8 @@ permissions:
 jobs:
   fast-checks:
     uses: ./.github/workflows/fast_checks.yml
+  emulator-checks:
+    uses: ./.github/workflows/emulator_checks.yml
   terraform-docs:
     needs: [fast-checks]
     uses: ./.github/workflows/tf-docs.yml

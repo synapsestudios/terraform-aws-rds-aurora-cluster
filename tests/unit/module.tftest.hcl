@@ -1,3 +1,8 @@
+# Fast tests of the module's own logic against the mock provider: defaults
+# picked by conditionals, for_each keys, plan-time lengths, and names built
+# from interpolation. tests/emulator applies, updates, and destroys the module
+# against AWS Emulator.
+
 mock_provider "aws" {
   # The mock provider fabricates random strings for computed attributes, which
   # the AWS provider's own input validators then reject. Override the handful
@@ -50,11 +55,6 @@ run "fresh_cluster_defaults" {
   command = plan
 
   assert {
-    condition     = aws_rds_cluster.this.snapshot_identifier == null
-    error_message = "snapshot_identifier should be null by default"
-  }
-
-  assert {
     condition     = aws_rds_cluster.this.database_name == "main"
     error_message = "database_name should default to 'main' when not restoring from a snapshot"
   }
@@ -62,32 +62,6 @@ run "fresh_cluster_defaults" {
   assert {
     condition     = aws_rds_cluster.this.master_username == "root"
     error_message = "master_username should be 'root' when not restoring from a snapshot"
-  }
-}
-
-run "fresh_cluster_honors_database_name_override" {
-  command = plan
-
-  variables {
-    database_name = "custom_db"
-  }
-
-  assert {
-    condition     = aws_rds_cluster.this.database_name == "custom_db"
-    error_message = "database_name input should propagate when not restoring from a snapshot"
-  }
-}
-
-run "restore_from_snapshot_passes_identifier_through" {
-  command = plan
-
-  variables {
-    snapshot_identifier = "test-snapshot-id"
-  }
-
-  assert {
-    condition     = aws_rds_cluster.this.snapshot_identifier == "test-snapshot-id"
-    error_message = "snapshot_identifier should be forwarded to the cluster resource"
   }
 }
 
@@ -151,44 +125,6 @@ run "plans_when_allowed_security_group_ids_are_unknown" {
   }
 }
 
-run "sg_egress_postgres_to_vpc_cidr" {
-  command = plan
-
-  assert {
-    condition     = aws_vpc_security_group_egress_rule.postgres.from_port == 5432
-    error_message = "Postgres egress from_port should be 5432"
-  }
-
-  assert {
-    condition     = aws_vpc_security_group_egress_rule.postgres.to_port == 5432
-    error_message = "Postgres egress to_port should be 5432"
-  }
-
-  assert {
-    condition     = aws_vpc_security_group_egress_rule.postgres.ip_protocol == "tcp"
-    error_message = "Postgres egress ip_protocol should be tcp"
-  }
-
-  assert {
-    condition     = aws_vpc_security_group_egress_rule.postgres.cidr_ipv4 == data.aws_vpc.database_vpc.cidr_block
-    error_message = "Postgres egress cidr_ipv4 should equal the VPC CIDR"
-  }
-}
-
-run "rds_monitoring_role_has_enhanced_monitoring_policy_attached" {
-  command = plan
-
-  assert {
-    condition     = aws_iam_role_policy_attachment.rds_monitoring.role == aws_iam_role.this.name
-    error_message = "Enhanced monitoring policy attachment should target the module's IAM role"
-  }
-
-  assert {
-    condition     = aws_iam_role_policy_attachment.rds_monitoring.policy_arn == "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
-    error_message = "Enhanced monitoring policy attachment should attach the AWS-managed AmazonRDSEnhancedMonitoringRole policy"
-  }
-}
-
 run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_known" {
   command = plan
 
@@ -202,31 +138,10 @@ run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_
   }
 }
 
-# RDS stores the managed master credentials as JSON with username and password
-# keys. The secret's ARN is unknown at plan, so the secret is only read at
-# apply.
-run "root_credentials_password_is_the_password_alone" {
-  command = apply
-
-  override_data {
-    target = data.aws_secretsmanager_secret_version.root_password
-    values = {
-      secret_string = "{\"username\":\"root\",\"password\":\"from-the-secret\"}"
-    }
-  }
-
-  assert {
-    condition     = output.root_credentials.password == "from-the-secret"
-    error_message = "root_credentials.password should be the secret's password key, not the whole JSON string"
-  }
-}
-
-# Note: we don't assert that database_name/master_username are null on the
-# cluster resource when snapshot_identifier is set. Under `command = plan`,
-# those attributes read as "(known after apply)" because the AWS API populates
-# them from the snapshot. Under `command = apply`, the mock provider replaces
-# nulls with fabricated strings. The conditional null-ing is trivially readable
-# in main.tf — tests can't add confidence here without asserting against mocks.
+# A restored cluster takes database_name and master_username from the
+# snapshot. Those values are unknown at plan, and the mock provider fills them
+# with random strings at apply, so tests/emulator/restore.tftest.hcl covers
+# that branch against a real snapshot.
 
 # The runs below apply against the mock provider and share state, so each run
 # starts from the cluster the run before it left behind.

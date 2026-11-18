@@ -1,0 +1,52 @@
+name: "Emulator Checks"
+on:
+  workflow_call:
+
+jobs:
+  emulator-test:
+    name: "Emulator Test (${{ matrix.file }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # One job per test file, so wall time is the slowest file. Add new
+        # files in tests/emulator here.
+        file: [lifecycle, restore]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          # Variable blocks in test files need 1.13 or later.
+          terraform_version: 1.13.4
+          terraform_wrapper: false
+
+      # Installs and starts the emulator, then points later steps at its
+      # credentials, config, and certificate.
+      - name: Setup AWS Emulator
+        id: emulator
+        uses: synapsestudios/setup-aws-emulator@7819367a0b09b4ac4c69386fc1557784c4ada560 # v1.0.1
+        with:
+          version: 1.0.513
+
+      - name: Terraform Init
+        run: terraform init -input=false -test-directory=tests/emulator
+
+      - name: Terraform Test
+        env:
+          EMULATOR_ENDPOINT: ${{ steps.emulator.outputs.endpoint-url }}
+          TEST_FILE: tests/emulator/${{ matrix.file }}.tftest.hcl
+        run: terraform test -test-directory=tests/emulator -filter="$TEST_FILE" -var "emulator_endpoint=$EMULATOR_ENDPOINT"
+
+  # One stable name for the required check, however many files the matrix runs.
+  emulator-checks:
+    name: "Emulator Checks"
+    needs: [emulator-test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every emulator test to pass
+        run: test "${{ needs.emulator-test.result }}" = success
