@@ -1,8 +1,8 @@
 # Runs the module through create, update, and destroy against AWS Emulator.
 # Start the emulator with tests/emulator/run.sh, which also runs this suite.
 
-# run.sh sets this with -var. It has no default, so the file can't run
-# without the script. Variable blocks in test files need Terraform 1.13.
+# run.sh and CI set this with -var. It has no default, so the file won't run
+# without it. Variable blocks in test files need Terraform 1.13.
 variable "emulator_endpoint" {
   type = string
 }
@@ -16,9 +16,10 @@ variables {
   database_subnets                = []
 }
 
-# Every endpoint points at the local emulator, so this file can't reach AWS even
-# with real credentials in the environment. allowed_account_ids is a second
-# guard: the emulator always answers as account 000000000000.
+# Every service the module and fixtures call points at the local emulator, so
+# this file can't reach AWS even with real credentials in the environment.
+# allowed_account_ids is a second guard, since the emulator always answers as
+# account 000000000000.
 provider "aws" {
   region              = "us-east-1"
   allowed_account_ids = ["000000000000"]
