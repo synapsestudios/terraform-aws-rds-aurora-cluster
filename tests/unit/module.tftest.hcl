@@ -5,14 +5,13 @@
 
 mock_provider "aws" {
   # The mock provider fabricates random strings for computed attributes. The
-  # AWS provider's input validators reject some of them, and outputs.tf can't
+  # AWS provider's input validators reject some of them, and the module can't
   # decode or index others. Override those so plan/apply doesn't fail on
   # unrelated checks.
   # See hashicorp/terraform-provider-aws#42834.
   #
-  # These mocks exist so the module can plan/apply successfully under a fake
-  # provider — assertions in run blocks target the module's own logic, not
-  # these mock values.
+  # The mocks only let the module plan and apply under a fake provider. Run
+  # block assertions check the module's own logic and never read these values.
   mock_data "aws_vpc" {
     defaults = {
       cidr_block = "10.0.0.0/16"
@@ -33,8 +32,9 @@ mock_provider "aws" {
 
   mock_resource "aws_rds_cluster" {
     defaults = {
-      # master_user_secret is a nested block the module reads; mock provider
-      # returns an empty list by default, which breaks outputs.tf's [0] index.
+      # master_user_secret is a nested block the module reads. The mock provider
+      # returns an empty list by default, which breaks the [0] index in main.tf
+      # and outputs.tf.
       master_user_secret = [{
         secret_arn    = "arn:aws:secretsmanager:us-west-2:123456789012:secret:mock-master-user-secret"
         secret_status = "active"
@@ -141,7 +141,7 @@ run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_
 
 # A restored cluster takes its master username from the snapshot. That value
 # is unknown at plan, and the mock provider fills it with a random string at
-# apply, so tests/emulator/restore.tftest.hcl covers it against a real snapshot.
+# apply. tests/emulator/restore.tftest.hcl checks it against a real snapshot.
 
 # The runs below apply against the mock provider and share state, so each run
 # starts from the cluster the run before it left behind.

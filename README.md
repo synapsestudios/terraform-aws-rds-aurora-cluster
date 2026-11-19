@@ -49,7 +49,7 @@ No modules.
 | <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | Instance class | `string` | `"db.t4g.medium"` | no |
 | <a name="input_instance_count"></a> [instance\_count](#input\_instance\_count) | How many RDS instances to create | `number` | `1` | no |
 | <a name="input_name"></a> [name](#input\_name) | Determines naming convention of assets. Generally follows DNS naming convention. Service name or abbreviation. | `string` | n/a | yes |
-| <a name="input_snapshot_identifier"></a> [snapshot\_identifier](#input\_snapshot\_identifier) | Identifier of a DB cluster snapshot to restore from. When set, database\_name is ignored, and the cluster keeps the snapshot's databases and master username. | `string` | `null` | no |
+| <a name="input_snapshot_identifier"></a> [snapshot\_identifier](#input\_snapshot\_identifier) | Identifier of a DB cluster snapshot to restore from. When set, the module ignores database\_name, and the cluster keeps the snapshot's databases and master username. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to the AWS resources. | `map(string)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the vpc the database belongs to | `string` | n/a | yes |
 
@@ -57,7 +57,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_database_name"></a> [database\_name](#output\_database\_name) | The name of the default database. Null when the cluster was restored from a snapshot — the restored databases exist at the Postgres layer and are not exposed via the RDS API. |
+| <a name="output_database_name"></a> [database\_name](#output\_database\_name) | The name of the default database. It is null for a cluster restored from a snapshot. The restored databases exist in Postgres, and the RDS API does not report them. |
 | <a name="output_db_cluster_id"></a> [db\_cluster\_id](#output\_db\_cluster\_id) | The ID of the RDS cluster |
 | <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | The writer endpoint of the RDS cluster |
 | <a name="output_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#output\_final\_snapshot\_identifier) | The name of the snapshot RDS takes when this cluster is destroyed or replaced. Each cluster gets its own name, so a replacement changes this value. |
@@ -67,6 +67,6 @@ No modules.
 | <a name="output_port"></a> [port](#output\_port) | The port the RDS cluster accepts connections on |
 | <a name="output_reader_endpoint"></a> [reader\_endpoint](#output\_reader\_endpoint) | The read-only endpoint of the RDS cluster |
 | <a name="output_root_credentials"></a> [root\_credentials](#output\_root\_credentials) | A map containing the username and password for the root user of the RDS cluster. Caution: This output will display the password in plain text. |
-| <a name="output_root_password_id"></a> [root\_password\_id](#output\_root\_password\_id) | The Terraform ID of the current version of the root password secret: the secret ARN, then \|AWSCURRENT. Use master\_user\_secret\_arn for the ARN alone. |
+| <a name="output_root_password_id"></a> [root\_password\_id](#output\_root\_password\_id) | The Terraform ID of the current version of the root password secret. It is the secret ARN followed by \|AWSCURRENT. Use master\_user\_secret\_arn for the ARN alone. |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The ID of the EC2 security group that controls access to the RDS cluster |
 <!-- END_TF_DOCS -->

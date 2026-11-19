@@ -34,7 +34,7 @@ output "port" {
 }
 
 output "database_name" {
-  description = "The name of the default database. Null when the cluster was restored from a snapshot — the restored databases exist at the Postgres layer and are not exposed via the RDS API."
+  description = "The name of the default database. It is null for a cluster restored from a snapshot. The restored databases exist in Postgres, and the RDS API does not report them."
   value       = aws_rds_cluster.this.database_name
 }
 
@@ -53,7 +53,7 @@ EOT
 }
 
 output "root_password_id" {
-  description = "The Terraform ID of the current version of the root password secret: the secret ARN, then |AWSCURRENT. Use master_user_secret_arn for the ARN alone."
+  description = "The Terraform ID of the current version of the root password secret. It is the secret ARN followed by |AWSCURRENT. Use master_user_secret_arn for the ARN alone."
   value       = data.aws_secretsmanager_secret_version.root_password.id
 }
 

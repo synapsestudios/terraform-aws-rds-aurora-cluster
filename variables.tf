@@ -74,5 +74,5 @@ variable "deletion_protection" {
 variable "snapshot_identifier" {
   type        = string
   default     = null
-  description = "Identifier of a DB cluster snapshot to restore from. When set, database_name is ignored, and the cluster keeps the snapshot's databases and master username."
+  description = "Identifier of a DB cluster snapshot to restore from. When set, the module ignores database_name, and the cluster keeps the snapshot's databases and master username."
 }
