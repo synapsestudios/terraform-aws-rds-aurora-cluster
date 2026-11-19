@@ -5,7 +5,7 @@ These tests apply the module against [AWS Emulator](https://github.com/aws/aws-e
 The module has two test suites:
 
 - `tests/unit` uses the mock provider and runs in seconds. It covers logic inside the module that a plan or a mock apply can show, such as defaults, `for_each` keys, and names.
-- `tests/emulator` takes minutes. Each file walks the module through plan, apply, update, and destroy.
+- `tests/emulator` takes minutes. Each file applies the module and destroys it at the end, and `lifecycle.tftest.hcl` also updates it in place.
 
 ## Running
 
@@ -41,4 +41,4 @@ Requirements:
 
 ## Safety
 
-Each test file points every provider endpoint at the local emulator and sets `allowed_account_ids = ["000000000000"]`, the emulator's only account. `emulator_endpoint` has no default, so the files only run when it is passed with `-var`, as `run.sh` and CI do.
+Each test file points the endpoint of every AWS service the tests call at the local emulator and sets `allowed_account_ids = ["000000000000"]`, the emulator's only account. `emulator_endpoint` has no default, so the files only run when it is passed with `-var`, as `run.sh` and CI do.

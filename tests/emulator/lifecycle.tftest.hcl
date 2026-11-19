@@ -16,8 +16,8 @@ variables {
   database_subnets                = []
 }
 
-# Every endpoint points at the local emulator, so this file can't reach AWS even
-# with real credentials in the environment. allowed_account_ids is a second
+# Every service the module and fixtures call points at the local emulator, so
+# this file can't reach AWS even with real credentials in the environment. allowed_account_ids is a second
 # guard: the emulator always answers as account 000000000000.
 provider "aws" {
   region              = "us-east-1"

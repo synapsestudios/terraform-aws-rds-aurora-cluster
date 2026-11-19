@@ -4,9 +4,10 @@
 # against AWS Emulator.
 
 mock_provider "aws" {
-  # The mock provider fabricates random strings for computed attributes, which
-  # the AWS provider's own input validators then reject. Override the handful
-  # of values that get validated so plan/apply doesn't fail on unrelated checks.
+  # The mock provider fabricates random strings for computed attributes. The
+  # AWS provider's input validators reject some of them, and outputs.tf can't
+  # decode or index others. Override those so plan/apply doesn't fail on
+  # unrelated checks.
   # See hashicorp/terraform-provider-aws#42834.
   #
   # These mocks exist so the module can plan/apply successfully under a fake
@@ -138,10 +139,9 @@ run "instance_identifiers_has_one_entry_per_instance_before_the_identifiers_are_
   }
 }
 
-# A restored cluster takes database_name and master_username from the
-# snapshot. Those values are unknown at plan, and the mock provider fills them
-# with random strings at apply, so tests/emulator/restore.tftest.hcl covers
-# that branch against a real snapshot.
+# A restored cluster takes its master username from the snapshot. That value
+# is unknown at plan, and the mock provider fills it with a random string at
+# apply, so tests/emulator/restore.tftest.hcl covers it against a real snapshot.
 
 # The runs below apply against the mock provider and share state, so each run
 # starts from the cluster the run before it left behind.

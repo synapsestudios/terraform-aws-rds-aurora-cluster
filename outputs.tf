@@ -53,7 +53,7 @@ EOT
 }
 
 output "root_password_id" {
-  description = "The ID of the secret that stores the root password for the RDS cluster"
+  description = "The Terraform ID of the current version of the root password secret: the secret ARN, then |AWSCURRENT. Use master_user_secret_arn for the ARN alone."
   value       = data.aws_secretsmanager_secret_version.root_password.id
 }
 
