@@ -1,6 +1,8 @@
 # Inputs the module needs, created inside AWS Emulator.
 
 terraform {
+  required_version = ">= 1.7"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -38,25 +40,31 @@ resource "aws_security_group" "client" {
 }
 
 output "vpc_id" {
-  value = aws_vpc.this.id
+  description = "ID of the VPC the test cluster runs in."
+  value       = aws_vpc.this.id
 }
 
 output "vpc_cidr_block" {
-  value = aws_vpc.this.cidr_block
+  description = "CIDR block of the test VPC."
+  value       = aws_vpc.this.cidr_block
 }
 
 output "availability_zones" {
-  value = local.availability_zones
+  description = "Availability zones the test subnets span."
+  value       = local.availability_zones
 }
 
 output "subnet_ids" {
-  value = [for az in local.availability_zones : aws_subnet.this[az].id]
+  description = "IDs of the test subnets, one per availability zone."
+  value       = [for az in local.availability_zones : aws_subnet.this[az].id]
 }
 
 output "db_cluster_parameter_group_name" {
-  value = aws_rds_cluster_parameter_group.this.name
+  description = "Name of the cluster parameter group the test cluster uses."
+  value       = aws_rds_cluster_parameter_group.this.name
 }
 
 output "client_security_group_id" {
-  value = aws_security_group.client.id
+  description = "ID of the security group that stands in for an application client in the ingress test."
+  value       = aws_security_group.client.id
 }

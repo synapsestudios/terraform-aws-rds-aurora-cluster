@@ -2,6 +2,8 @@
 # not "root", so the test can tell whether the module kept the snapshot's value.
 
 terraform {
+  required_version = ">= 1.7"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -11,7 +13,8 @@ terraform {
 }
 
 variable "subnet_ids" {
-  type = list(string)
+  description = "IDs of the subnets for the source cluster's DB subnet group."
+  type        = list(string)
 }
 
 locals {
@@ -40,9 +43,11 @@ resource "aws_db_cluster_snapshot" "source" {
 }
 
 output "snapshot_identifier" {
-  value = aws_db_cluster_snapshot.source.db_cluster_snapshot_identifier
+  description = "Identifier of the snapshot the restore test restores from."
+  value       = aws_db_cluster_snapshot.source.db_cluster_snapshot_identifier
 }
 
 output "master_username" {
-  value = local.master_username
+  description = "Master username of the source cluster, which the restored cluster should keep."
+  value       = local.master_username
 }
