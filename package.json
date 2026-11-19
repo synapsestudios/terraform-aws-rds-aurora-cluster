@@ -1,0 +1,16 @@
+{
+  "name": "terraform-aws-rds-aurora-cluster",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@synapsestudios/lintofu": "0.9.1",
+    "eslint": "10.15.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

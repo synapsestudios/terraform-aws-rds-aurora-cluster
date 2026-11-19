@@ -11,6 +11,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install lintofu
+        run: npm ci
+
+      - name: lintofu
+        run: npm run lint
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
