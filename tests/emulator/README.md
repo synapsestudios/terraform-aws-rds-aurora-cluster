@@ -41,4 +41,4 @@ Requirements:
 
 ## Safety
 
-Each test file points every provider endpoint at the local emulator and sets `allowed_account_ids = ["000000000000"]`, the emulator's only account. `emulator_endpoint` has no default, so the files don't run without `run.sh`.
+Each test file points every provider endpoint at the local emulator and sets `allowed_account_ids = ["000000000000"]`, the emulator's only account. `emulator_endpoint` has no default, so the files only run when it is passed with `-var`, as `run.sh` and CI do.

@@ -1,8 +1,8 @@
 # Runs the module through create, update, and destroy against AWS Emulator.
 # Start the emulator with tests/emulator/run.sh, which also runs this suite.
 
-# run.sh sets this with -var. It has no default, so the file can't run
-# without the script. Variable blocks in test files need Terraform 1.13.
+# run.sh and CI set this with -var. It has no default, so the file won't run
+# without it. Variable blocks in test files need Terraform 1.13.
 variable "emulator_endpoint" {
   type = string
 }

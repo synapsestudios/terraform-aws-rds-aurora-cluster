@@ -6,6 +6,8 @@ jobs:
   emulator-test:
     name: "Emulator Test (${{ matrix.file }})"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +49,8 @@ jobs:
     needs: [emulator-test]
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Require every emulator test to pass
         run: test "${{ needs.emulator-test.result }}" = success
